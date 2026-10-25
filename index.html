@@ -59,19 +59,19 @@ dialog h2{margin:0 0 10px}
 .act{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .err{color:var(--pink);font-weight:700;min-height:20px;margin:6px 0 0}
 #toast{display:none;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px;font-weight:700;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.3)}
-#lead{border:2px solid var(--ink);border-radius:10px;background:var(--card);padding:5px 8px}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.strip{grid-template-columns:repeat(7,1fr)}.strip .nv{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body><div class="wrap">
 <header><h1>Hành trình 650</h1>
-<div class="meta"><span class="pill" id="ph"></span><span id="wk"></span><span class="xpb" id="xp"></span><button class="main" id="edit">Sửa lịch học</button><button id="bell">Nhắc: tắt</button><select id="lead" aria-label="Nhắc trước bao lâu"><option value="15">trước 15 phút</option><option value="30">trước 30 phút</option><option value="60">trước 60 phút</option></select><button id="ics">Xuất lịch (.ics)</button></div></header>
+<div class="meta"><span class="pill" id="ph"></span><span id="wk"></span><span class="xpb" id="xp"></span><button class="main" id="edit">Sửa lịch học</button><button id="theme">Giao diện: tự động</button><button id="ics">Xuất lịch (.ics)</button></div></header>
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="strip" id="strip"></div>
 <div class="grid">
 <section class="card"><h2><span id="dt"></span><button id="now">Hôm nay</button></h2><div class="tl" id="tl"></div></section>
-<section class="card"><div class="top"><div class="ring" id="ring"><span id="rt"></span></div><div><b id="gh">Mục tiêu nhỏ</b><p>Bấm vào chữ để sửa, tick khi xong.</p></div></div>
+<section class="card"><div class="top"><div class="ring" id="ring"><span id="rt"></span></div><div><b id="gh">Mục tiêu nhỏ</b></div></div>
 <ul id="gl"></ul>
 <div class="add"><input type="text" id="gn" placeholder="Thêm mục tiêu mới..." aria-label="Mục tiêu mới"><label><input type="checkbox" id="go">Chỉ ngày này</label><button id="ga">Thêm</button></div>
+
 </div>
 
 </div>
@@ -166,46 +166,22 @@ $("sv").onclick=function(){var n=$("fn").value.trim();
  save();render();fillPick();$("er").textContent="Đã lưu."};
 $("del").onclick=function(){if(idx<0)return;CL.splice(idx,1);idx=-1;save();render();fillPick();fillForm()};
 $("rs").onclick=function(){CL=copy(DEF);idx=-1;save();render();fillPick();fillForm();$("er").textContent="Đã về lịch gốc."};
-S.rem=S.rem||{on:false,lead:30,sent:{}};
 function p2(n){return("0"+n).slice(-2)}
-function hm(m){return p2(Math.floor(m/60))+":"+p2(m%60)}
 function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.display="none"},12000)}
-function notify(title,body){toast(title+" — "+body);
- try{if(window.Notification&&Notification.permission==="granted"){
-  if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(r){if(r)r.showNotification(title,{body:body});else new Notification(title,{body:body})}).catch(function(){})}
-  else new Notification(title,{body:body})}}catch(e){}}
-function check(){if(!S.rem.on)return;
- var n=new Date(),nm=n.getHours()*60+n.getMinutes(),d=wd(n),k=key(n),L=+S.rem.lead;S.rem.sent=S.rem.sent||{};
- var items=CL.filter(function(c){return c.d===d}).map(function(c){return{id:c.n+c.a,t:c.n,a:mins(c.a),w:"Phòng "+(c.r||"?")}});
- items.push({id:"toeic",t:"Giờ TOEIC chính",a:19*60+45,w:"Mở flashcard và bài của hôm nay"});
- items.forEach(function(it){var id=k+"|"+it.id+"|"+L;
-  if(nm>=it.a-L&&nm<it.a&&!S.rem.sent[id]){S.rem.sent[id]=1;notify(it.t+" bắt đầu sau "+(it.a-nm)+" phút",it.w+" · "+hm(it.a))}});
- for(var q in S.rem.sent){if(q.indexOf(k+"|")!==0)delete S.rem.sent[q]}
- save()}
-function bell(){$("bell").textContent=S.rem.on?"Nhắc: bật":"Nhắc: tắt";$("lead").value=S.rem.lead}
-$("bell").onclick=function(){
- if(S.rem.on){S.rem.on=false;save();bell();return}
- var once=false;
- function go(p){if(once)return;once=true;S.rem.on=true;save();bell();
-  if(p!=="granted")toast("Chưa được cấp quyền thông báo, nhắc sẽ chỉ hiện trong trang. Bật quyền trong cài đặt trình duyệt nếu muốn nhận thông báo hệ thống.");
-  else notify("Đã bật nhắc lịch","Mình sẽ báo trước "+S.rem.lead+" phút khi trang còn mở");
-  check()}
- if(!window.Notification){go("denied");return}
- if(Notification.permission==="default"){var r=Notification.requestPermission(go);if(r&&r.then)r.then(go)}else go(Notification.permission)};
-$("lead").onchange=function(){S.rem.lead=+$("lead").value;save();check()};
 function ie(s){return String(s==null?"":s).replace(/[,;\\]/g,"\\$&")}
 $("ics").onclick=function(){
  var base=mon(today)<START?START:mon(today),L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Hanh trinh 650//VI","CALSCALE:GREGORIAN"];
  function dt(x,m){return x.getFullYear()+p2(x.getMonth()+1)+p2(x.getDate())+"T"+p2(Math.floor(m/60))+p2(m%60)+"00"}
  function ev(id,title,di,a,b,loc,rr){var x=new Date(base);x.setDate(x.getDate()+di);
-  L.push("BEGIN:VEVENT","UID:h650-"+id+"@local","DTSTAMP:20261026T000000Z","DTSTART:"+dt(x,a),"DTEND:"+dt(x,b),"SUMMARY:"+ie(title),"LOCATION:"+ie(loc),"RRULE:"+rr,"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+ie(title),"TRIGGER:-PT"+S.rem.lead+"M","END:VALARM","END:VEVENT")}
+  L.push("BEGIN:VEVENT","UID:h650-"+id+"@local","DTSTAMP:20261026T000000Z","DTSTART:"+dt(x,a),"DTEND:"+dt(x,b),"SUMMARY:"+ie(title),"LOCATION:"+ie(loc),"RRULE:"+rr,"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+ie(title),"TRIGGER:-PT30M","END:VALARM","END:VEVENT")}
  CL.forEach(function(c,i){if(c.d==null)return;ev("c"+i,c.n+(c.c?" ("+c.c+")":""),c.d,mins(c.a),mins(c.b),c.r,"FREQ=WEEKLY;UNTIL=20270314T235959")});
  ev("toeic","Giờ TOEIC chính",0,19*60+45,21*60+15,"","FREQ=DAILY;UNTIL=20270314T235959");
  L.push("END:VCALENDAR");
- try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\r\n")],{type:"text/calendar"}));a.download="lich-hoc-650.ics";document.body.appendChild(a);a.click();a.remove();toast("Đã xuất lịch. Mở file này bằng Google Calendar hoặc Lịch của điện thoại để có nhắc trước "+S.rem.lead+" phút.")}
+ try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\r\n")],{type:"text/calendar"}));a.download="lich-hoc-650.ics";document.body.appendChild(a);a.click();a.remove();toast("Đã xuất lịch. Mở file này bằng Google Calendar hoặc Lịch của điện thoại để có nhắc trước 30 phút.")}
  catch(e){toast("Không tải được file ở chế độ xem thử này. Hãy mở bản trên GitHub Pages để xuất lịch.")}};
-if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){try{navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}}
-setInterval(check,30000);document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
-bell();check();
+var TH=["auto","light","dark"],TN={auto:"Giao diện: tự động",light:"Giao diện: sáng",dark:"Giao diện: tối"};
+function applyTheme(){var t=S.theme||"auto";if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);$("theme").textContent=TN[t]}
+$("theme").onclick=function(){var t=S.theme||"auto";S.theme=TH[(TH.indexOf(t)+1)%3];save();applyTheme()};
+applyTheme();
 render();
 </script></body></html>
