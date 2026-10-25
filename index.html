@@ -72,9 +72,8 @@ dialog h2{margin:0 0 10px}
 <section class="card"><div class="top"><div class="ring" id="ring"><span id="rt"></span></div><div><b id="gh">Mục tiêu nhỏ</b><p>Bấm vào chữ để sửa, tick khi xong.</p></div></div>
 <ul id="gl"></ul>
 <div class="add"><input type="text" id="gn" placeholder="Thêm mục tiêu mới..." aria-label="Mục tiêu mới"><label><input type="checkbox" id="go">Chỉ ngày này</label><button id="ga">Thêm</button></div>
-<p class="note">Mục tiêu thường lặp lại mỗi tuần vào đúng thứ này. Tick "Chỉ ngày này" nếu chỉ cần một lần.</p></section>
 </div>
-<p class="note">Lộ trình 20 tuần (26/10/2026 → 14/3/2027): nền tảng ~400, tăng tốc ~550, về đích 650+. Khung nét hồng là giờ học TOEIC chính gợi ý (19:45–21:15).</p>
+
 </div>
 <dialog id="dlg"><h2>Sửa lịch học</h2>
 <div class="f"><label class="w">Chọn môn<select id="pick"></select></label>
@@ -128,7 +127,7 @@ function renderDay(){
  for(var hh=H0;hh<=H1;hh++)t+='<div class="hr" style="top:'+(hh-H0)*PX+'px"><span>'+hh+':00</span></div>';
  CL.forEach(function(c,i){if(c.d!==di)return;var a=mins(c.a),b=mins(c.b);
   t+='<button class="blk c'+(i%6)+'" data-ed="'+i+'" style="top:'+((a-H0*60)/60*PX)+'px;height:'+Math.max(26,(b-a)/60*PX)+'px"><b>'+esc(c.n)+'</b>'+esc(c.a)+"–"+esc(c.b)+" · "+esc(c.r)+"</button>"});
- t+='<div class="blk toeic" style="top:'+((19*60+45-H0*60)/60*PX)+'px;height:'+(90/60*PX)+'px">Giờ TOEIC chính</div>';
+
  $("tl").style.height=(H1-H0)*PX+"px";$("tl").innerHTML=t;
  var k=key(cur),g=goals(cur),n=0,l="";
  g.forEach(function(q){var d=!!S.done[k+":"+q.id];if(d)n++;
